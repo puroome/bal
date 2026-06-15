@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교육용 밸런스 게임</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 게임 시작 화면 -->
+        <div id="startScreen" class="screen active">
+            <div class="welcome-box">
+                <h1>⚖️ 교육용 밸런스 게임</h1>
+                <p>두 선택지를 비교하고 당신의 선택을 기록해보세요!</p>
+                
+                <div class="input-group">
+                    <label for="userName">이름을 입력하세요:</label>
+                    <input 
+                        type="text" 
+                        id="userName" 
+                        placeholder="예: 홍길동"
+                        maxlength="20"
+                    >
+                </div>
+
+                <div class="filter-group">
+                    <label for="categoryFilter">카테고리 선택 (선택사항):</label>
+                    <select id="categoryFilter">
+                        <option value="">전체</option>
+                    </select>
+                </div>
+
+                <button id="startBtn" class="btn btn-primary btn-large">게임 시작</button>
+                <p class="hint">💡 이름은 선택 결과 기록에 사용됩니다</p>
+            </div>
+        </div>
+
+        <!-- 게임 플레이 화면 -->
+        <div id="gameScreen" class="screen">
+            <div class="game-header">
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="stats">
+                    <span>문제: <span id="questionCount">0</span>/<span id="totalCount">0</span></span>
+                </div>
+                <button id="quitBtn" class="btn btn-secondary btn-small">나가기</button>
+            </div>
+
+            <div class="game-content">
+                <h2 id="questionText" class="question"></h2>
+
+                <div class="choice-container">
+                    <button id="choiceA" class="choice-btn choice-a">
+                        <span class="choice-label">선택지 A</span>
+                        <span class="choice-text" id="choiceAText"></span>
+                    </button>
+
+                    <div class="vs">VS</div>
+
+                    <button id="choiceB" class="choice-btn choice-b">
+                        <span class="choice-label">선택지 B</span>
+                        <span class="choice-text" id="choiceBText"></span>
+                    </button>
+                </div>
+
+                <div class="question-meta">
+                    <span id="categoryTag" class="tag tag-category"></span>
+                    <span id="difficultyTag" class="tag tag-difficulty"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 결과 화면 -->
+        <div id="resultScreen" class="screen">
+            <div class="result-box">
+                <h1>🎉 게임 완료!</h1>
+                
+                <div class="result-summary">
+                    <p><strong id="playerName"></strong>님의 선택 통계</p>
+                    
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="statA">0</div>
+                            <div class="stat-label">선택지 A 선택</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="statB">0</div>
+                            <div class="stat-label">선택지 B 선택</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="statTotal">0</div>
+                            <div class="stat-label">총 문제 수</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="categoryChart" class="chart-container">
+                    <h3>카테고리별 분석</h3>
+                    <div id="chartContent"></div>
+                </div>
+
+                <div class="button-group">
+                    <button id="restartBtn" class="btn btn-primary">다시 시작</button>
+                    <button id="downloadBtn" class="btn btn-secondary">결과 다운로드</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 로딩 표시 -->
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner"></div>
+            <p>데이터를 로드 중입니다...</p>
+        </div>
+
+        <!-- 에러 알림 -->
+        <div id="errorMessage" class="error-message">
+            <span id="errorText"></span>
+            <button class="close-btn" onclick="closeError()">✕</button>
+        </div>
+    </div>
+
+    <!-- 스크립트 로드 순서 중요 -->
+    <script src="config/config.js"></script>
+    <script src="utils/sheetsAPI.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
