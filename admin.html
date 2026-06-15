@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance Game · 통계</title>
+    <style>
+        :root {
+            --primary-color: #6366F1;
+            --success-color: #10B981;
+            --background: #F8FAFC;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #0F172A;
+                --surface: #1E293B;
+                --border: #334155;
+                --text-primary: #F1F5F9;
+                --text-secondary: #94A3B8;
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 8px;
+        }
+
+        .wrap {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--surface);
+            padding: 30px 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary-color), #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .summary {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--radius);
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover:not(:disabled) {
+            background-color: #4F46E5;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .q-card {
+            background: var(--surface);
+            padding: 24px 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 16px;
+        }
+
+        .q-text {
+            font-size: 1.15em;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: var(--text-primary);
+        }
+
+        .opt {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .opt-label { color: var(--text-primary); }
+
+        .opt-label .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            font-size: 0.78em;
+            font-weight: 700;
+            color: white;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .badge-a { background-color: var(--primary-color); }
+        .badge-b { background-color: var(--success-color); }
+
+        .opt-count {
+            font-weight: 700;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .opt-count .pct {
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            margin-left: 6px;
+        }
+
+        .bar {
+            display: flex;
+            height: 14px;
+            border-radius: 7px;
+            overflow: hidden;
+            background-color: var(--border);
+            margin-top: 14px;
+        }
+
+        .bar .seg-a { background-color: var(--primary-color); }
+        .bar .seg-b { background-color: var(--success-color); }
+
+        .no-response {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            font-style: italic;
+            margin-top: 6px;
+        }
+
+        .state {
+            background: var(--surface);
+            padding: 40px 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="header">
+            <h1>📊 Balance Game 통계</h1>
+            <div class="summary" id="summary">데이터를 불러오는 중…</div>
+            <button class="refresh-btn" id="refreshBtn" onclick="loadStats()">새로고침</button>
+        </div>
+
+        <div id="content">
+            <div class="state">
+                <div class="spinner"></div>
+                <p>데이터를 불러오는 중…</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="config/config.js"></script>
+    <script>
+        async function loadStats() {
+            const content = document.getElementById('content');
+            const summary = document.getElementById('summary');
+            const btn = document.getElementById('refreshBtn');
+
+            btn.disabled = true;
+            content.innerHTML = '<div class="state"><div class="spinner"></div><p>데이터를 불러오는 중…</p></div>';
+
+            try {
+                const id = CONFIG.SPREADSHEET_ID;
+                const key = CONFIG.API_KEY;
+                const qUrl = `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Questions!A2:F1000?key=${key}`;
+                const rUrl = `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Results!A2:E100000?key=${key}`;
+
+                const [qRes, rRes] = await Promise.all([fetch(qUrl), fetch(rUrl)]);
+                const qData = await qRes.json();
+                const rData = await rRes.json();
+
+                // 질문 목록 (id -> 질문/보기)
+                const questions = (qData.values || [])
+                    .filter(row => row[0] && row[1])
+                    .map(row => ({
+                        id: row[0],
+                        question: row[1],
+                        a: row[2] || 'A',
+                        b: row[3] || 'B'
+                    }));
+
+                // 결과 집계: Results 행 = [시간, 학생이름, 질문ID, 선택, 카테고리]
+                const results = rData.values || [];
+                const counts = {};
+                const students = new Set();
+
+                results.forEach(row => {
+                    const qid = row[2];
+                    const choice = (row[3] || '').toString().trim().toUpperCase();
+                    const name = row[1];
+                    if (name) students.add(name);
+                    if (!qid) return;
+                    if (!counts[qid]) counts[qid] = { A: 0, B: 0 };
+                    if (choice === 'A') counts[qid].A++;
+                    else if (choice === 'B') counts[qid].B++;
+                });
+
+                summary.textContent = `참여 학생 ${students.size}명 · 총 응답 ${results.length}건`;
+
+                if (questions.length === 0) {
+                    content.innerHTML = '<div class="state"><p>등록된 문항이 없습니다.</p></div>';
+                    btn.disabled = false;
+                    return;
+                }
+
+                // 화면 그리기
+                const html = questions.map(q => {
+                    const c = counts[q.id] || { A: 0, B: 0 };
+                    const total = c.A + c.B;
+                    const pctA = total ? Math.round((c.A / total) * 100) : 0;
+                    const pctB = total ? 100 - pctA : 0;
+
+                    const bar = total
+                        ? `<div class="bar">
+                               <div class="seg-a" style="width:${pctA}%"></div>
+                               <div class="seg-b" style="width:${pctB}%"></div>
+                           </div>`
+                        : `<div class="no-response">아직 응답이 없습니다.</div>`;
+
+                    return `
+                        <div class="q-card">
+                            <div class="q-text">${escapeHtml(q.question)}</div>
+                            <div class="opt">
+                                <span class="opt-label"><span class="badge badge-a">A</span>${escapeHtml(q.a)}</span>
+                                <span class="opt-count">${c.A}명${total ? `<span class="pct">${pctA}%</span>` : ''}</span>
+                            </div>
+                            <div class="opt">
+                                <span class="opt-label"><span class="badge badge-b">B</span>${escapeHtml(q.b)}</span>
+                                <span class="opt-count">${c.B}명${total ? `<span class="pct">${pctB}%</span>` : ''}</span>
+                            </div>
+                            ${bar}
+                        </div>
+                    `;
+                }).join('');
+
+                content.innerHTML = html;
+            } catch (error) {
+                console.error(error);
+                summary.textContent = '';
+                content.innerHTML = '<div class="state"><p>데이터를 불러오지 못했습니다.<br>잠시 후 새로고침 버튼을 눌러 주세요.</p></div>';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</body>
+</html>
