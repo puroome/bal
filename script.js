@@ -227,16 +227,18 @@ async function selectChoice(choice) {
         timestamp: new Date().toLocaleString('ko-KR')
     });
 
-    // 구글시트에 저장
-    try {
-        await SheetsAPI.saveChoice(
-            question.question_id,
-            choice,
-            gameState.userName
-        );
-    } catch (error) {
-        console.warn('선택 저장 실패:', error);
-        // 게임은 계속 진행
+// 구글시트에 저장 (웹훅 방식)
+    if (CONFIG.WEBHOOK_URL) {
+        try {
+            await SheetsAPIPublic.saveChoiceViaWebhook(
+                question.question_id,
+                choice,
+                gameState.userName
+            );
+        } catch (error) {
+            console.warn('선택 저장 실패:', error);
+            // 게임은 계속 진행
+        }
     }
 
     // 다음 질문으로 (0.6초 후)
