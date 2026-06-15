@@ -10,7 +10,7 @@ const CONFIG = {
     API_KEY: 'AIzaSyACWvmyWIGMFCsETA4voj9tTBqku338NYM',
 
     // Google Apps Script 웹훅 URL (선택 결과 저장)
-    WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbyKH6_GSENL4-SoE9khJRGthsp0RmquWwbfBriiSlKyHtpa77IIcR8PCm_nkHOELaXU/exec',
+    WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbyYg7Frc_JjuiJuUfBejL_Ckz2G-HQb-MKtBSWZW9xiKcT_R-1xI3jEtQorJkTL_u-m/exec',
 
     // 게임 설정
     GAME: {
