@@ -215,6 +215,8 @@ async function selectChoice(choice) {
         questionId: question.question_id,
         choice: choice,
         question: question.question,
+        option_a: question.option_a,
+        option_b: question.option_b,
         category: question.category,
         timestamp: new Date().toLocaleString('ko-KR')
     });

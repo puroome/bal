@@ -52,16 +52,15 @@ html, body {
 .container {
     width: 100%;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
     padding: 8px;
 }
 
 .screen {
-    width: calc(100% - 16px);
+    grid-area: 1 / 1;
+    width: 100%;
     max-width: 600px;
-    margin: 0 auto;
     opacity: 0;
     visibility: hidden;
     transform: translateY(20px);
