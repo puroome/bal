@@ -59,8 +59,8 @@ html, body {
 }
 
 .screen {
-    width: 100%;
-    max-width: 1000px;
+    width: calc(100% - 16px);
+    max-width: 600px;
     margin: 0 auto;
     opacity: 0;
     visibility: hidden;
