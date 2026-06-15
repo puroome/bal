@@ -55,12 +55,13 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 5px;
+    padding: 8px;
 }
 
 .screen {
     width: 100%;
-    max-width: 95%;
+    max-width: 1000px;
+    margin: 0 auto;
     opacity: 0;
     visibility: hidden;
     transform: translateY(20px);
