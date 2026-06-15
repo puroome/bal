@@ -221,13 +221,20 @@ function selectChoice(choice) {
         timestamp: new Date().toLocaleString('ko-KR')
     });
 
-    // Firebase에 저장 (기다리지 않고 백그라운드로 전송 → 즉시 다음 문항)
+    // Firebase + 구글시트에 둘 다 저장 (기다리지 않고 백그라운드로 → 즉시 다음 문항)
+    const ts = new Date().toISOString();
     saveChoiceToFirebase({
         name: gameState.userName,
         questionId: question.question_id,
         choice: choice,
         category: question.category || '',
-        ts: new Date().toISOString()
+        ts: ts
+    });
+    saveChoiceToSheet({
+        userName: gameState.userName,
+        questionId: question.question_id,
+        choice: choice,
+        timestamp: ts
     });
 
     // 다음 질문으로 (0.6초 후)
@@ -247,7 +254,18 @@ function saveChoiceToFirebase(data) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
         keepalive: true
-    }).catch(err => console.warn('선택 저장 실패:', err));
+    }).catch(err => console.warn('Firebase 저장 실패:', err));
+}
+
+// 구글시트(Apps Script 웹훅)에 선택 저장 (fire-and-forget, 백업용)
+function saveChoiceToSheet(data) {
+    if (!CONFIG.WEBHOOK_URL) return;
+    // await 하지 않음: 시트 저장은 백그라운드로만 처리(느려도 화면 반응에 영향 없음)
+    fetch(CONFIG.WEBHOOK_URL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        keepalive: true
+    }).catch(err => console.warn('시트 저장 실패:', err));
 }
 
 // ============================================
