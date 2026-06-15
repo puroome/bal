@@ -55,12 +55,12 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 10px;
 }
 
 .screen {
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
     opacity: 0;
     visibility: hidden;
     transform: translateY(20px);
@@ -140,6 +140,7 @@ html, body {
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
     text-align: center;
+    width: 100%;
 }
 
 .welcome-box h1 {
@@ -356,6 +357,7 @@ select:focus {
     padding: 40px;
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
+    width: 100%;
 }
 
 .result-box h1 {
