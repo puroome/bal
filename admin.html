@@ -335,10 +335,7 @@
             </a>
             <h1>Balance Game 통계</h1>
             <div class="summary" id="summary">데이터를 불러오는 중…</div>
-            <div class="btn-row">
-                <button class="refresh-btn" id="refreshBtn" onclick="loadStats()">새로고침</button>
-                <button class="sync-btn" id="syncBtn" onclick="syncSheetToFirebase()">시트→Firebase 동기화</button>
-            </div>
+            <button class="refresh-btn" id="refreshBtn" onclick="loadStats()">새로고침</button>
         </div>
 
         <div id="content">
@@ -511,64 +508,6 @@
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') closeModal();
         });
-
-        // 구글시트 Results 내용으로 Firebase 를 덮어쓰기 (수동 동기화)
-        async function syncSheetToFirebase() {
-            const ok = confirm(
-                '구글시트 Results의 현재 내용으로 Firebase를 덮어씁니다.\n\n' +
-                '· 구글시트에서 지운 데이터는 Firebase에서도 사라집니다.\n' +
-                '· 구글시트에만 있는 데이터는 Firebase에 추가됩니다.\n\n' +
-                '계속할까요?'
-            );
-            if (!ok) return;
-
-            const btn = document.getElementById('syncBtn');
-            btn.disabled = true;
-            const orig = btn.textContent;
-            btn.textContent = '동기화 중…';
-
-            try {
-                const id = CONFIG.SPREADSHEET_ID;
-                const key = CONFIG.API_KEY;
-                const rUrl = `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Results!A2:E100000?key=${key}`;
-                const rData = await (await fetch(rUrl)).json();
-                const rows = rData.values || [];
-
-                // 시트 행 -> Firebase 레코드 객체
-                // 행 = [시간, 학생이름, 질문ID, 선택, 카테고리]
-                const obj = {};
-                let n = 0;
-                rows.forEach((row, i) => {
-                    const qid = row[2];
-                    if (!qid) return;
-                    obj['r' + i] = {
-                        ts: row[0] || '',
-                        name: row[1] || '',
-                        questionId: qid,
-                        choice: (row[3] || '').toString().trim().toUpperCase(),
-                        category: row[4] || ''
-                    };
-                    n++;
-                });
-
-                // Firebase results 노드를 통째로 교체 (비어 있으면 null 로 비움)
-                const putRes = await fetch(`${CONFIG.FIREBASE_DB_URL}/results.json`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(n > 0 ? obj : null)
-                });
-                if (!putRes.ok) throw new Error('Firebase 쓰기 실패 (' + putRes.status + ')');
-
-                alert(`동기화 완료: ${n}건이 Firebase에 반영되었습니다.`);
-                loadStats();
-            } catch (e) {
-                console.error(e);
-                alert('동기화 실패: ' + e.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = orig;
-            }
-        }
 
         function escapeHtml(str) {
             return String(str)
