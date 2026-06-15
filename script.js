@@ -149,8 +149,12 @@ function startGame() {
         return;
     }
 
-    // 질문 순서 무작위화 (선택사항)
-    gameState.questions = filteredQuestions.sort(() => Math.random() - 0.5);
+    // 질문 순서: 설정이 켜져 있을 때만 무작위화, 아니면 시트 순서 유지
+    if (CONFIG.GAME.RANDOMIZE_QUESTIONS) {
+        gameState.questions = filteredQuestions.slice().sort(() => Math.random() - 0.5);
+    } else {
+        gameState.questions = filteredQuestions;
+    }
 
     showScreen('game');
     loadNextQuestion();
