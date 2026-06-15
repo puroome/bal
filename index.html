@@ -12,7 +12,7 @@
         <div id="startScreen" class="screen active">
             <div class="welcome-box">
                 <h1>⚖️ Balance Game</h1>
-                <p>두 선택지 중 하나를 선택하세요.</p>
+                <p>두 선택지를 비교하고 당신의 선택을 기록해보세요!</p>
                 
                 <div class="input-group">
                     <label for="userName">이름을 입력하세요:</label>
@@ -32,6 +32,7 @@
                 </div>
 
                 <button id="startBtn" class="btn btn-primary btn-large">게임 시작</button>
+                <p class="hint">💡 이름은 선택 결과 기록에 사용됩니다</p>
             </div>
         </div>
 
@@ -52,14 +53,12 @@
 
                 <div class="choice-container">
                     <button id="choiceA" class="choice-btn choice-a">
-                        <span class="choice-label">선택지 A</span>
                         <span class="choice-text" id="choiceAText"></span>
                     </button>
 
                     <div class="vs">VS</div>
 
                     <button id="choiceB" class="choice-btn choice-b">
-                        <span class="choice-label">선택지 B</span>
                         <span class="choice-text" id="choiceBText"></span>
                     </button>
                 </div>

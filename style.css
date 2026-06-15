@@ -287,6 +287,41 @@ select:focus {
     cursor: not-allowed;
 }
 
+/* 좌: 파스텔 파랑 / 우: 파스텔 빨강 */
+.choice-a {
+    background-color: #EAF2FF;
+    border-color: #BBD5FB;
+    color: #1E293B;
+}
+
+.choice-b {
+    background-color: #FDEBEB;
+    border-color: #F8C4C4;
+    color: #1E293B;
+}
+
+.choice-a:hover:not(:disabled) {
+    background-color: #DCE9FF;
+    border-color: #7FB0F7;
+}
+
+.choice-b:hover:not(:disabled) {
+    background-color: #FBDADA;
+    border-color: #F29B9B;
+}
+
+.choice-a.selected {
+    background-color: #3B82F6;
+    border-color: #3B82F6;
+    color: #FFFFFF;
+}
+
+.choice-b.selected {
+    background-color: #EF4444;
+    border-color: #EF4444;
+    color: #FFFFFF;
+}
+
 .choice-label {
     font-size: 0.85em;
     font-weight: 700;
