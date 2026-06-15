@@ -12,6 +12,9 @@ const CONFIG = {
     // Google Apps Script 웹훅 URL (선택 결과 저장)
     WEBHOOK_URL: 'https://script.google.com/macros/s/AKfycbyYg7Frc_JjuiJuUfBejL_Ckz2G-HQb-MKtBSWZW9xiKcT_R-1xI3jEtQorJkTL_u-m/exec',
 
+    // Firebase Realtime Database URL (선택 결과 저장/조회)
+    FIREBASE_DB_URL: 'https://balance-game-bf19e-default-rtdb.asia-southeast1.firebasedatabase.app',
+
     // 게임 설정
     GAME: {
         // 한 번에 보여줄 질문 수 (0이면 전체)
