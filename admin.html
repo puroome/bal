@@ -137,11 +137,22 @@
             white-space: nowrap;
         }
 
+        .opt-count.clickable {
+            cursor: pointer;
+            color: var(--primary-color);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .opt-count.clickable:hover { opacity: 0.7; }
+
         .opt-count .pct {
             font-weight: 500;
             color: var(--text-secondary);
             font-size: 0.85em;
             margin-left: 6px;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .bar {
@@ -183,6 +194,78 @@
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 팝업(모달) */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal-box {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 380px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-size: 1.05em;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.6em;
+            line-height: 1;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .modal-body {
+            padding: 16px 20px;
+            overflow-y: auto;
+        }
+
+        .name-list { list-style: none; }
+
+        .name-list li {
+            padding: 10px 4px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .name-list li:last-child { border-bottom: none; }
+
+        .name-list .num {
+            color: var(--text-secondary);
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -201,8 +284,22 @@
         </div>
     </div>
 
+    <!-- 명단 팝업 -->
+    <div class="modal-overlay" id="modal" onclick="closeModal()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+                <button class="modal-close" onclick="closeModal()" aria-label="닫기">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
     <script src="config/config.js"></script>
     <script>
+        // 집계 데이터를 보관 (팝업에서 명단 조회용)
+        let statsData = { questions: [], names: {} };
+
         async function loadStats() {
             const content = document.getElementById('content');
             const summary = document.getElementById('summary');
@@ -232,20 +329,23 @@
                     }));
 
                 // 결과 집계: Results 행 = [시간, 학생이름, 질문ID, 선택, 카테고리]
+                // names[qid] = { A: [이름...], B: [이름...] }
                 const results = rData.values || [];
-                const counts = {};
+                const names = {};
                 const students = new Set();
 
                 results.forEach(row => {
                     const qid = row[2];
                     const choice = (row[3] || '').toString().trim().toUpperCase();
-                    const name = row[1];
-                    if (name) students.add(name);
+                    const name = (row[1] || '').toString().trim() || '(이름 없음)';
+                    if (row[1]) students.add(name);
                     if (!qid) return;
-                    if (!counts[qid]) counts[qid] = { A: 0, B: 0 };
-                    if (choice === 'A') counts[qid].A++;
-                    else if (choice === 'B') counts[qid].B++;
+                    if (!names[qid]) names[qid] = { A: [], B: [] };
+                    if (choice === 'A') names[qid].A.push(name);
+                    else if (choice === 'B') names[qid].B.push(name);
                 });
+
+                statsData = { questions, names };
 
                 summary.textContent = `참여 학생 ${students.size}명 · 총 응답 ${results.length}건`;
 
@@ -257,9 +357,11 @@
 
                 // 화면 그리기
                 const html = questions.map(q => {
-                    const c = counts[q.id] || { A: 0, B: 0 };
-                    const total = c.A + c.B;
-                    const pctA = total ? Math.round((c.A / total) * 100) : 0;
+                    const n = names[q.id] || { A: [], B: [] };
+                    const cA = n.A.length;
+                    const cB = n.B.length;
+                    const total = cA + cB;
+                    const pctA = total ? Math.round((cA / total) * 100) : 0;
                     const pctB = total ? 100 - pctA : 0;
 
                     const bar = total
@@ -269,16 +371,23 @@
                            </div>`
                         : `<div class="no-response">아직 응답이 없습니다.</div>`;
 
+                    const countA = cA > 0
+                        ? `<span class="opt-count clickable" data-qid="${q.id}" data-choice="A">${cA}명<span class="pct">${pctA}%</span></span>`
+                        : `<span class="opt-count">0명</span>`;
+                    const countB = cB > 0
+                        ? `<span class="opt-count clickable" data-qid="${q.id}" data-choice="B">${cB}명<span class="pct">${pctB}%</span></span>`
+                        : `<span class="opt-count">0명</span>`;
+
                     return `
                         <div class="q-card">
                             <div class="q-text">${escapeHtml(q.question)}</div>
                             <div class="opt">
                                 <span class="opt-label"><span class="badge badge-a">A</span>${escapeHtml(q.a)}</span>
-                                <span class="opt-count">${c.A}명${total ? `<span class="pct">${pctA}%</span>` : ''}</span>
+                                ${countA}
                             </div>
                             <div class="opt">
                                 <span class="opt-label"><span class="badge badge-b">B</span>${escapeHtml(q.b)}</span>
-                                <span class="opt-count">${c.B}명${total ? `<span class="pct">${pctB}%</span>` : ''}</span>
+                                ${countB}
                             </div>
                             ${bar}
                         </div>
@@ -294,6 +403,47 @@
                 btn.disabled = false;
             }
         }
+
+        // 숫자 클릭 -> 명단 팝업
+        document.getElementById('content').addEventListener('click', e => {
+            const el = e.target.closest('.opt-count.clickable');
+            if (!el) return;
+            openModal(el.dataset.qid, el.dataset.choice);
+        });
+
+        function openModal(qid, choice) {
+            const q = statsData.questions.find(x => x.id === qid);
+            if (!q) return;
+            const list = (statsData.names[qid] && statsData.names[qid][choice]) || [];
+            const optText = choice === 'A' ? q.a : q.b;
+
+            document.getElementById('modalTitle').textContent =
+                `${q.question} — ${optText} (${list.length}명)`;
+
+            const body = document.getElementById('modalBody');
+            if (list.length === 0) {
+                body.innerHTML = '<p style="color:var(--text-secondary)">응답한 학생이 없습니다.</p>';
+            } else {
+                body.innerHTML = '<ul class="name-list">' +
+                    list.map((name, i) =>
+                        `<li><span class="num">${i + 1}.</span>${escapeHtml(name)}</li>`
+                    ).join('') +
+                    '</ul>';
+            }
+
+            document.getElementById('modal').classList.add('show');
+        }
+
+        function closeModal() {
+            // 닫기 버튼, 오버레이 배경 클릭, ESC 키에서 호출됨
+            // (modal-box 내부 클릭은 stopPropagation 으로 막혀 있음)
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        // ESC 키로 닫기
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
 
         function escapeHtml(str) {
             return String(str)
