@@ -21,7 +21,7 @@ const CONFIG = {
         MAX_QUESTIONS: 0,
         
         // 질문 순서 무작위화
-        RANDOMIZE_QUESTIONS: true,
+        RANDOMIZE_QUESTIONS: false,
         
         // 난이도별 색상
         DIFFICULTY_COLORS: {
