@@ -346,11 +346,12 @@
                 const id = CONFIG.SPREADSHEET_ID;
                 const key = CONFIG.API_KEY;
                 const qUrl = `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Questions!A2:F1000?key=${key}`;
-                const rUrl = `https://sheets.googleapis.com/v4/spreadsheets/${id}/values/Results!A2:E100000?key=${key}`;
+                const fbUrl = `${CONFIG.FIREBASE_DB_URL}/results.json`;
 
-                const [qRes, rRes] = await Promise.all([fetch(qUrl), fetch(rUrl)]);
+                // 질문은 구글시트, 응답은 Firebase 에서 읽기
+                const [qRes, fbRes] = await Promise.all([fetch(qUrl), fetch(fbUrl)]);
                 const qData = await qRes.json();
-                const rData = await rRes.json();
+                const fbData = await fbRes.json(); // {pushId: {name, questionId, choice, category, ts}} 또는 null
 
                 // 질문 목록 (id -> 질문/보기)
                 const questions = (qData.values || [])
@@ -362,17 +363,18 @@
                         b: row[3] || 'B'
                     }));
 
-                // 결과 집계: Results 행 = [시간, 학생이름, 질문ID, 선택, 카테고리]
+                // 결과 집계 (Firebase: 각 레코드 = {name, questionId, choice, category, ts})
                 // names[qid] = { A: [이름...], B: [이름...] }
-                const results = rData.values || [];
+                const results = fbData ? Object.values(fbData) : [];
                 const names = {};
                 const students = new Set();
 
-                results.forEach(row => {
-                    const qid = row[2];
-                    const choice = (row[3] || '').toString().trim().toUpperCase();
-                    const name = (row[1] || '').toString().trim() || '(이름 없음)';
-                    if (row[1]) students.add(name);
+                results.forEach(rec => {
+                    if (!rec) return;
+                    const qid = rec.questionId;
+                    const choice = (rec.choice || '').toString().trim().toUpperCase();
+                    const name = (rec.name || '').toString().trim() || '(이름 없음)';
+                    if (rec.name) students.add(name);
                     if (!qid) return;
                     if (!names[qid]) names[qid] = { A: [], B: [] };
                     if (choice === 'A') names[qid].A.push(name);

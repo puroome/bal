@@ -201,7 +201,7 @@ function updateQuestionMeta(question) {
 // 선택 처리
 // ============================================
 
-async function selectChoice(choice) {
+function selectChoice(choice) {
     const question = gameState.questions[gameState.currentQuestionIndex];
 
     // UI 피드백
@@ -221,25 +221,33 @@ async function selectChoice(choice) {
         timestamp: new Date().toLocaleString('ko-KR')
     });
 
-    // 구글시트에 저장 (웹훅 방식)
-    if (CONFIG.WEBHOOK_URL) {
-        try {
-            await SheetsAPIPublic.saveChoiceViaWebhook(
-                question.question_id,
-                choice,
-                gameState.userName
-            );
-        } catch (error) {
-            console.warn('선택 저장 실패:', error);
-            // 게임은 계속 진행
-        }
-    }
+    // Firebase에 저장 (기다리지 않고 백그라운드로 전송 → 즉시 다음 문항)
+    saveChoiceToFirebase({
+        name: gameState.userName,
+        questionId: question.question_id,
+        choice: choice,
+        category: question.category || '',
+        ts: new Date().toISOString()
+    });
 
     // 다음 질문으로 (0.6초 후)
     setTimeout(() => {
         gameState.currentQuestionIndex++;
         loadNextQuestion();
     }, 600);
+}
+
+// Firebase Realtime Database 에 선택 저장 (fire-and-forget)
+function saveChoiceToFirebase(data) {
+    if (!CONFIG.FIREBASE_DB_URL) return;
+    const url = `${CONFIG.FIREBASE_DB_URL}/results.json`;
+    // await 하지 않음: 네트워크 응답을 기다리지 않아 선택 반응이 즉시 일어남
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        keepalive: true
+    }).catch(err => console.warn('선택 저장 실패:', err));
 }
 
 // ============================================
