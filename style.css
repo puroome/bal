@@ -137,7 +137,7 @@ html, body {
 
 .welcome-box {
     background: var(--surface);
-    padding: 40px;
+    padding: 30px 20px;
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
     text-align: center;
@@ -233,7 +233,7 @@ select:focus {
 
 .game-content {
     background: var(--surface);
-    padding: 40px;
+    padding: 30px 20px;
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
     margin-bottom: 20px;
@@ -355,7 +355,7 @@ select:focus {
 
 .result-box {
     background: var(--surface);
-    padding: 40px;
+    padding: 30px 20px;
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
     width: 100%;
