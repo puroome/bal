@@ -600,6 +600,51 @@ select:focus {
     }
 }
 
+/* ============================================
+   선택 결과 스타일
+   ============================================ */
+
+.choices-display {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 20px 0;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 16px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.choice-result {
+    padding: 16px;
+    background-color: var(--background);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 8px;
+}
+
+.choice-result .question-num {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.choice-result .question-text {
+    font-size: 1em;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.choice-result .answer-text {
+    font-size: 0.95em;
+    color: var(--success-color);
+    font-weight: 500;
+}
+
 @media (max-width: 480px) {
     .welcome-box {
         padding: 20px;

@@ -25,7 +25,6 @@ const controls = {
     startBtn: document.getElementById('startBtn'),
     quitBtn: document.getElementById('quitBtn'),
     restartBtn: document.getElementById('restartBtn'),
-    downloadBtn: document.getElementById('downloadBtn'),
     userNameInput: document.getElementById('userName'),
     categoryFilter: document.getElementById('categoryFilter')
 };
@@ -39,8 +38,7 @@ const gameElements = {
     progressBar: document.getElementById('progressBar'),
     questionCount: document.getElementById('questionCount'),
     totalCount: document.getElementById('totalCount'),
-    categoryTag: document.getElementById('categoryTag'),
-    difficultyTag: document.getElementById('difficultyTag')
+    categoryTag: document.getElementById('categoryTag')
 };
 
 const resultElements = {
@@ -86,7 +84,6 @@ function setupEventListeners() {
         resetGame();
         showScreen('start');
     });
-    controls.downloadBtn.addEventListener('click', downloadResults);
     
     gameElements.choiceA.addEventListener('click', () => selectChoice('A'));
     gameElements.choiceB.addEventListener('click', () => selectChoice('B'));
@@ -198,11 +195,6 @@ function updateQuestionMeta(question) {
     // 카테고리 태그
     gameElements.categoryTag.textContent = question.category || '미분류';
     gameElements.categoryTag.className = 'tag tag-category';
-
-    // 난이도 태그
-    const diffText = question.difficulty || '보통';
-    gameElements.difficultyTag.textContent = diffText;
-    gameElements.difficultyTag.className = `tag tag-difficulty difficulty-${diffText}`;
 }
 
 // ============================================
@@ -227,7 +219,7 @@ async function selectChoice(choice) {
         timestamp: new Date().toLocaleString('ko-KR')
     });
 
-// 구글시트에 저장 (웹훅 방식)
+    // 구글시트에 저장 (웹훅 방식)
     if (CONFIG.WEBHOOK_URL) {
         try {
             await SheetsAPIPublic.saveChoiceViaWebhook(
@@ -259,54 +251,26 @@ function endGame() {
 }
 
 function calculateResults() {
-    const countA = gameState.choices.filter(c => c.choice === 'A').length;
-    const countB = gameState.choices.filter(c => c.choice === 'B').length;
-    const total = gameState.choices.length;
-
     resultElements.playerName.textContent = gameState.userName;
-    resultElements.statA.textContent = countA;
-    resultElements.statB.textContent = countB;
-    resultElements.statTotal.textContent = total;
-
-    // 카테고리별 분석
-    displayCategoryAnalysis();
+    
+    // 선택 결과 표시
+    displayChoices();
 }
 
-function displayCategoryAnalysis() {
-    const categoryData = {};
-
-    gameState.choices.forEach(choice => {
-        const category = choice.category || '미분류';
-        if (!categoryData[category]) {
-            categoryData[category] = { A: 0, B: 0 };
-        }
-        categoryData[category][choice.choice]++;
-    });
-
-    const chartHTML = Object.entries(categoryData)
-        .map(([category, data]) => {
-            const total = data.A + data.B;
-            const percentA = ((data.A / total) * 100).toFixed(1);
-            const percentB = ((data.B / total) * 100).toFixed(1);
-
-            return `
-                <div class="category-stat">
-                    <h4>${category}</h4>
-                    <div class="stat-bar">
-                        <div class="bar-segment bar-a" style="width: ${percentA}%; title="A: ${data.A}개">
-                            <span>${data.A}</span>
-                        </div>
-                        <div class="bar-segment bar-b" style="width: ${percentB}%;" title="B: ${data.B}개">
-                            <span>${data.B}</span>
-                        </div>
-                    </div>
-                    <div class="stat-text">A: ${percentA}% | B: ${percentB}%</div>
-                </div>
-            `;
-        })
+function displayChoices() {
+    const choicesDisplay = document.getElementById('choicesDisplay');
+    
+    const choicesHTML = gameState.choices
+        .map((choice, index) => `
+            <div class="choice-result">
+                <div class="question-num">문제 ${index + 1}</div>
+                <div class="question-text">${choice.question}</div>
+                <div class="answer-text">내 선택: <strong>${choice.choice === 'A' ? choice.option_a : choice.option_b}</strong></div>
+            </div>
+        `)
         .join('');
-
-    resultElements.chartContent.innerHTML = chartHTML || '<p>분석 데이터가 없습니다.</p>';
+    
+    choicesDisplay.innerHTML = choicesHTML || '<p>선택 결과가 없습니다.</p>';
 }
 
 // ============================================
@@ -358,34 +322,6 @@ function resetGame() {
 
 // ============================================
 // 결과 다운로드
-// ============================================
-
-function downloadResults() {
-    const csv = generateCSV();
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', `balance_game_${gameState.userName}_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-function generateCSV() {
-    let csv = 'BOM,이름,질문,선택,카테고리,시간\n';
-    csv += '\uFEFF'; // UTF-8 BOM
-
-    gameState.choices.forEach((choice, index) => {
-        csv += `${index + 1},"${gameState.userName}","${choice.question}","${choice.choice}","${choice.category}","${choice.timestamp}"\n`;
-    });
-
-    return csv;
-}
-
 // ============================================
 // 페이지 로드 시 초기화
 // ============================================
