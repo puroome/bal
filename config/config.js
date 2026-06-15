@@ -9,7 +9,7 @@ const CONFIG = {
 
     // Google Cloud API 키 (읽기만 필요한 경우)
     // https://console.cloud.google.com 에서 생성
-    API_KEY: 'YOUR_API_KEY_HERE',
+    API_KEY: 'AIzaSyAvDwxZD3jWf0ydox6NGP4nzWBDKJ46aRk',
 
     // Google OAuth 2.0 클라이언트 ID (쓰기가 필요한 경우)
     // CLIENT_ID: 'YOUR_CLIENT_ID_HERE',
