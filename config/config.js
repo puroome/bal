@@ -5,7 +5,7 @@
 const CONFIG = {
     // Google Sheets ID (공개 시트의 URL에서 추출)
     // 예: https://docs.google.com/spreadsheets/d/[이 부분]/edit
-    SPREADSHEET_ID: 'YOUR_SPREADSHEET_ID_HERE',
+    SPREADSHEET_ID: '1Y2dqBgXPsiaicWc9hw7MFfHV4mRWWBVtk0-l041bnHI',
 
     // Google Cloud API 키 (읽기만 필요한 경우)
     // https://console.cloud.google.com 에서 생성
