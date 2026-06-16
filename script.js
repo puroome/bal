@@ -226,7 +226,7 @@ function selectChoice(choice) {
     });
 
     // Firebase + 구글시트에 둘 다 저장 (기다리지 않고 백그라운드로 → 즉시 다음 문항)
-    const ts = new Date().toISOString();
+    const ts = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
     saveChoiceToFirebase({
         name: gameState.userName,
         questionId: question.question_id,
